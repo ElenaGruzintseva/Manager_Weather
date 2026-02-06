@@ -2,9 +2,8 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import WeatherData
-from .serializers import WeatherDataSerializer, WeatherRequestSerializer, BatchWeatherRequestSerializer
-from .services.data_service import WeatherDataService
+from .models import WeatherData, WeatherFetchLog
+from .serializers import WeatherDataSerializer, WeatherFetchRequestSerializer, WeatherFetchLogSerializer
 from .tasks import fetch_weather_task
 import logging
 
@@ -16,76 +15,44 @@ class WeatherDataViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = WeatherDataSerializer
     permission_classes = [IsAuthenticated]
 
-    @action(detail=False, methods=['get'])
-    def current(self, request):
-        city = request.query_params.get('city')
-        if not city:
-            return Response({'error': 'City parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-        data_service = WeatherDataService()
-        weather = data_service.get_latest_weather(city)
-
-        if not weather:
-            return Response({'error': f'No weather data found for {city}'}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = self.get_serializer(weather)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=['get'])
-    def history(self, request):
-        """Получить историю данных для города"""
-        city = request.query_params.get('city')
-        days = request.query_params.get('days', 7)
-
-        if not city:
-            return Response(
-                {'error': 'City parameter is required'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            days = int(days)
-        except ValueError:
-            days = 7
-
-        data_service = WeatherDataService()
-        history = data_service.get_weather_history(city, days)
-        serializer = self.get_serializer(history, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        # Опционально: фильтрация по координатам через query params
+        queryset = super().get_queryset()
+        lat = self.request.query_params.get('lat')
+        lon = self.request.query_params.get('lon')
+        if lat and lon:
+            try:
+                lat_f = float(lat)
+                lon_f = float(lon)
+                queryset = queryset.filter(latitude=lat_f, longitude=lon_f)
+            except ValueError:
+                pass  # Игнорируем невалидные параметры
+        return queryset
 
     @action(detail=False, methods=['post'])
     def fetch(self, request):
-        """Получить и сохранить данные для города"""
-        serializer = WeatherRequestSerializer(data=request.data)
+        """Получить и сохранить данные для координат"""
+        serializer = WeatherFetchRequestSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        city = serializer.validated_data['city']
-        force_update = serializer.validated_data['force_update']
+        lat = serializer.validated_data['latitude']
+        lon = serializer.validated_data['longitude']
 
-        data_service = WeatherDataService()
+        task = fetch_weather_task.delay(lat, lon)
+        return Response({
+            'task_id': task.id,
+            'coordinates': (lat, lon)
+        }, status=status.HTTP_202_ACCEPTED)
 
-        if not force_update:
-            cached_weather = data_service.get_latest_weather(city)
-            if cached_weather:
-                serializer = self.get_serializer(cached_weather)
-                return Response({'data': serializer.data, 'source': 'cache'})
 
-        task = fetch_weather_task.delay(city)
-        return Response({'task_id': task.id, 'city': city}, status=status.HTTP_202_ACCEPTED)
-
-    @action(detail=False, methods=['post'])
-    def batch_fetch(self, request):
-        """Получить данные для нескольких городов"""
-        serializer = BatchWeatherRequestSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        cities = serializer.validated_data['cities']
-        tasks = {}
-
-        for city in cities:
-            task = fetch_weather_task.delay(city)
-            tasks[city] = task.id
-
-        return Response({'tasks': tasks}, status=status.HTTP_202_ACCEPTED)
+class WeatherFetchLogViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet для просмотра логов запросов к внешнему API
+    """
+    queryset = WeatherFetchLog.objects.all()
+    serializer_class = WeatherFetchLogSerializer
+    permission_classes = [IsAuthenticated]
+    filterset_fields = ['location', 'status']
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']

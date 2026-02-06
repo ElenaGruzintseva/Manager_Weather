@@ -1,24 +1,24 @@
 from django.db import models
 from django.utils import timezone
-from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class WeatherData(models.Model):
     """Данные о погоде"""
-    city = models.CharField(max_length=100, db_index=True)
-    city_lower = models.CharField(max_length=100, db_index=True)  # для быстрого поиска
+    # Координаты
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, db_index=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, db_index=True)
 
     # Основные параметры
-    temperature = models.FloatField()
-    pressure = models.IntegerField()
-    humidity = models.IntegerField()
+    temperature = models.FloatField(null=True, blank=True)
+    pressure = models.IntegerField(null=True, blank=True)
+    humidity = models.IntegerField(null=True, blank=True)
 
     # Осадки
     prec_type = models.IntegerField(null=True, blank=True)
     prec_strength = models.FloatField(null=True, blank=True)
 
     # Ветер
-    wind_speed = models.FloatField()
+    wind_speed = models.FloatField(null=True, blank=True)
     wind_direction = models.IntegerField(null=True, blank=True)
 
     # Метаданные
@@ -29,31 +29,30 @@ class WeatherData(models.Model):
     class Meta:
         ordering = ['-fetched_at']
         indexes = [
-            models.Index(fields=['city_lower', '-fetched_at']),
+            models.Index(fields=['latitude', 'longitude', '-fetched_at']),
             models.Index(fields=['-fetched_at']),
         ]
-        constraints = [
-            models.UniqueConstraint(fields=['city_lower'], name='unique_city_weather')
-        ]
 
-    def save(self, *args, **kwargs):
-        self.city_lower = self.city.lower()
-        super().save(*args, **kwargs)
+    def __str__(self):
+        return f"({self.latitude}, {self.longitude}) - {self.temperature}°C"
 
 
 class WeatherFetchLog(models.Model):
     """Лог запросов к внешнему API"""
     STATUS_CHOICES = [
-        ('success', 'Success'),
-        ('error', 'Error'),
-        ('timeout', 'Timeout'),
+        ('success', 'Успешно'),
+        ('error', 'Ошибка'),
+        ('timeout', 'Таймаут'),
     ]
 
-    city = models.CharField(max_length=100, db_index=True)
+    location = models.CharField(max_length=50, db_index=True) # Хранит "lat,lon"
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, db_index=True)
-    error_message = models.TextField(blank=True)
-    response_time = models.FloatField(null=True)
+    error_summary = models.TextField(blank=True) # Краткое описание ошибки
+    response_time_ms = models.FloatField(null=True) # Время ответа в мс
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.location} - {self.status} at {self.created_at}"

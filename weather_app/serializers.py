@@ -6,20 +6,23 @@ class WeatherDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = WeatherData
         fields = [
-            'id', 'city', 'temperature', 'pressure', 'humidity',
+            'id', 'latitude', 'longitude', 'temperature', 'pressure', 'humidity',
             'prec_type', 'prec_strength', 'wind_speed', 'wind_direction',
-            'fetched_at'
+            'fetched_at', 'created_at', 'updated_at'
         ]
+        read_only_fields = ['id', 'created_at', 'updated_at', 'fetched_at']
 
 
-class WeatherRequestSerializer(serializers.Serializer):
-    city = serializers.CharField(max_length=100)
-    force_update = serializers.BooleanField(default=False)
+class WeatherFetchRequestSerializer(serializers.Serializer):
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
 
 
-class BatchWeatherRequestSerializer(serializers.Serializer):
-    cities = serializers.ListField(
-        child=serializers.CharField(max_length=100),
-        min_length=1,
-        max_length=50
-    )
+class WeatherFetchLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WeatherFetchLog
+        fields = [
+            'id', 'location', 'status', 'error_summary',
+            'response_time_ms', 'created_at'
+        ]
+        read_only_fields = ['id', 'created_at']

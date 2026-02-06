@@ -3,6 +3,7 @@ djangorestframework==3.14.0
 mysqlclient==2.2.0
 celery==5.3.4
 redis==5.0.1
+requests==2.32.3
 python-dotenv==1.0.0
 urllib3==2.1.0
 drf-yasg==1.21.7
