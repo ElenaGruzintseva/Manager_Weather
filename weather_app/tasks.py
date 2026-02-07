@@ -1,6 +1,7 @@
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.utils import timezone
+from django.conf import settings
 from datetime import timedelta
 from .pipeline.base import PipelineManager
 from .pipeline.actions.fetch import FetchWeatherAction

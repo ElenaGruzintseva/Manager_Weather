@@ -13,7 +13,6 @@ WEATHER_UPDATE_LOCATIONS = [
         {'lat': 55.75396, 'lon': 37.620393, },  # 'city': 'Moscow'
         {'lat': 59.93428, 'lon': 30.335099, },  # 'city': 'St.Petersburg'
         {'lat': 55.008354, 'lon': 82.93573, },  # 'city': 'Novosibirsk'
-        {'lat': 39.907500, 'lon': 116.39700, },  # 'city': 'Pekin'
     ]
 
 INSTALLED_APPS = [
