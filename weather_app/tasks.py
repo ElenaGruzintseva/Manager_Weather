@@ -123,7 +123,7 @@ def log_weather_fetch_async(location: str, status: str, error_summary: str = '',
 
 
 @shared_task
-def cleanup_old_weather_logs(days: int = 3):
+def cleanup_old_weather_logs(days: int = 2):
     """Задача для очистки старых записей логов"""
     cutoff_date = timezone.now() - timedelta(days=days)
     deleted_count, _ = WeatherFetchLog.objects.filter(
