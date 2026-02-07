@@ -10,7 +10,9 @@ class LogWeatherFetchAction(PipelineAction):
     def execute(self, context: dict) -> dict:
         lat = context.get('latitude')
         lon = context.get('longitude')
-        timezone_name = context.get('raw_weather_data', {}).get('info', {}).get('tzinfo', {}).get('name')
+        standardized_data = context.get('standardized_weather_data', {})
+        timezone_name = standardized_data.get('timezone_name')
+
         fetch_success = context.get('fetch_success', False)
         fetch_duration_ms = context.get('fetch_duration_ms')
 

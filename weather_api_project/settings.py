@@ -137,11 +137,11 @@ CACHES = {
 # Конфигурация пайплайна
 PIPELINE_CONFIG = {
     'fetch_weather': {
-        'enabled': False,
+        'enabled': True,
         'timeout': 30,
     },
     'store_data': {
-        'enabled': False,
+        'enabled': True,
     },
     'log_to_db': {
         'enabled': True,
