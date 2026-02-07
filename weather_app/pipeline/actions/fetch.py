@@ -16,12 +16,13 @@ class FetchWeatherAction(PipelineAction):
             raise ValueError("Широта и долгота обязательны")
 
         service = WeatherDataService()
-        raw_data = service.fetch_raw_data(lat, lon)
+        # Получаем стандартные данные
+        standardized_data = service.fetch_standardized_data(lat, lon)
 
-        if not raw_data:
-            raise Exception(f"Не удалось получить данные для ({lat}, {lon})")
+        if not standardized_data:
+            raise Exception(f"Не удалось получить или преобразовать данные для ({lat}, {lon})")
 
-        context['raw_weather_data'] = raw_data
+        context['standardized_weather_data'] = standardized_data
         context['fetch_success'] = True
-        logger.info(f"Данные погоды получены для ({lat}, {lon})")
+        logger.info(f"Стандартизированные данные погоды получены для ({lat}, {lon})")
         return context

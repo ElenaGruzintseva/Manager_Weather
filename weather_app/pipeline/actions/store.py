@@ -1,23 +1,22 @@
-from ...pipeline.base import PipelineAction
 from ...services.data_service import WeatherDataService
+from ...pipeline.base import PipelineAction
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 class StoreWeatherDataAction(PipelineAction):
-    """Действие для сохранения данных о погоде в базу"""
-
     def execute(self, context: dict) -> dict:
-        raw_data = context.get('raw_weather_data')
+        # Получаем *стандартизированные* данные
+        standardized_data = context.get('standardized_weather_data')
         lat = context.get('latitude')
         lon = context.get('longitude')
 
-        if not raw_data or not lat or not lon:
+        if not standardized_data or not lat or not lon:
             raise ValueError("Не хватает данных для сохранения")
 
         service = WeatherDataService()
-        weather_obj = service.save_weather_data(lat, lon, raw_data)
+        weather_obj = service.save_weather_data_from_standardized(lat, lon, standardized_data)
 
         if not weather_obj:
             raise Exception(f"Не удалось сохранить данные для ({lat}, {lon})")

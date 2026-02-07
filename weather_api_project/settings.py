@@ -9,6 +9,12 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
+WEATHER_UPDATE_LOCATIONS = [
+        {'lat': 55.75396, 'lon': 37.620393, },  # 'city': 'Moscow'
+        {'lat': 59.93428, 'lon': 30.335099, },  # 'city': 'St.Petersburg'
+        {'lat': 55.008354, 'lon': 82.93573, },  # 'city': 'Novosibirsk'
+    ]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

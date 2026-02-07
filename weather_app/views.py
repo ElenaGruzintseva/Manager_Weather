@@ -1,3 +1,5 @@
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -29,6 +31,24 @@ class WeatherDataViewSet(viewsets.ReadOnlyModelViewSet):
                 pass  # Игнорируем невалидные параметры
         return queryset
 
+    @swagger_auto_schema(
+        method='post',
+        operation_summary="Получить и сохранить погоду для координат",
+        operation_description="Отправляет задачу в очередь на получение данных о погоде для указанных координат и их сохранение.",
+        request_body=WeatherFetchRequestSerializer,
+        responses={
+            202: openapi.Response(
+                description="Задача на получение погоды запланирована",
+                examples={
+                    "application/json": {
+                        "task_id": "abc123...",
+                        "coordinates": [55.75396, 37.620393]
+                    }
+                }
+            ),
+            400: "Неверный формат данных запроса"
+        }
+    )
     @action(detail=False, methods=['post'])
     def fetch(self, request):
         """Получить и сохранить данные для координат"""
