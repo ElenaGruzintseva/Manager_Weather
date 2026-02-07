@@ -6,7 +6,7 @@ class WeatherDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = WeatherData
         fields = [
-            'id', 'latitude', 'longitude', 'temperature', 'pressure', 'humidity',
+            'id', 'latitude', 'longitude', 'timezone_name', 'temperature', 'pressure', 'humidity',
             'prec_type', 'prec_strength', 'wind_speed', 'wind_direction',
             'fetched_at', 'created_at', 'updated_at'
         ]

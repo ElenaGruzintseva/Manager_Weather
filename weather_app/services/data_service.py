@@ -67,7 +67,7 @@ class WeatherDataService:
             logger.error(f"Ошибка сохранения данных для ({lat}, {lon}): {str(e)}")
             return None
 
-    def save_weather_data(self, lat: float, lon: float, data: dict[str, Any]) -> Optional[WeatherData]:
+    def save_weather_data(self, lat: float, lon: float, data: dict[str, Any], timezone_name: str = None) -> Optional[WeatherData]:
         """Сохраняет данные о погоде в базу."""
         fact = data.get('fact', {})
         info = data.get('info', {})
@@ -75,6 +75,7 @@ class WeatherDataService:
         weather_obj_data = {
             'latitude': lat,
             'longitude': lon,
+            'timezone_name': timezone_name,
             'temperature': fact.get('temp'),
             'pressure': info.get('def_pressure_mm'),
             'humidity': fact.get('humidity'),
@@ -95,7 +96,7 @@ class WeatherDataService:
                     longitude=lon,
                     defaults=weather_obj_data
                 )
-            logger.info(f"{'Созданы' if created else 'Обновлены'} данные погоды для ({lat}, {lon})")
+            logger.info(f"{'Созданы' if created else 'Обновлены'} данные погоды для ({lat}, {lon}), TZ: {timezone_name}")
             return weather_obj
         except Exception as e:
             logger.error(f"Ошибка сохранения данных для ({lat}, {lon}): {str(e)}")

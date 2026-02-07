@@ -10,10 +10,11 @@ class LogWeatherFetchAction(PipelineAction):
     def execute(self, context: dict) -> dict:
         lat = context.get('latitude')
         lon = context.get('longitude')
+        timezone_name = context.get('raw_weather_data', {}).get('info', {}).get('tzinfo', {}).get('name')
         fetch_success = context.get('fetch_success', False)
         fetch_duration_ms = context.get('fetch_duration_ms')
 
-        location_str = f"{lat},{lon}"
+        location_str = timezone_name or f"{lat},{lon}"
 
         if fetch_success:
             status = 'success'

@@ -76,8 +76,10 @@ class NotifyTelegramAction(PipelineAction):
     def _format_message(self, weather_data) -> str:
         """Форматирует сообщение для Telegram."""
         # Пример формата сообщения
+        location_desc = weather_data.timezone_name or f"({weather_data.latitude}, {weather_data.longitude})"
+
         return (
-            f"<b>Погода в ({weather_data.latitude}, {weather_data.longitude})</b>\n"
+            f"<b>Погода в {location_desc}</b>\n"
             f"Температура: {weather_data.temperature}°C\n"
             f"Давление: {weather_data.pressure} мм рт. ст.\n"
             f"Влажность: {weather_data.humidity}%\n"

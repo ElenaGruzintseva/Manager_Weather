@@ -15,6 +15,10 @@ class StoreWeatherDataAction(PipelineAction):
         if not standardized_data or not lat or not lon:
             raise ValueError("Не хватает данных для сохранения")
 
+        info = raw_data.get('info', {})
+        tz_info = info.get('tzinfo', {})
+        timezone_name = tz_info.get('name')
+
         service = WeatherDataService()
         weather_obj = service.save_weather_data_from_standardized(lat, lon, standardized_data)
 

@@ -33,10 +33,12 @@ class WeatherData(models.Model):
         indexes = [
             models.Index(fields=['latitude', 'longitude', '-fetched_at']),
             models.Index(fields=['-fetched_at']),
+            models.Index(fields=['timezone_name']),
         ]
 
     def __str__(self):
-        return f"({self.latitude}, {self.longitude}) - {self.temperature}°C"
+        tz_display = self.timezone_name or f"({self.latitude}, {self.longitude})"
+        return f"{tz_display} - {self.temperature}°C"
 
 
 class WeatherFetchLog(models.Model):
@@ -47,10 +49,10 @@ class WeatherFetchLog(models.Model):
         ('timeout', 'Таймаут'),
     ]
 
-    location = models.CharField(max_length=50, db_index=True) # Хранит "lat,lon"
+    location = models.CharField(max_length=100, db_index=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, db_index=True)
-    error_summary = models.TextField(blank=True) # Краткое описание ошибки
-    response_time_ms = models.FloatField(null=True) # Время ответа в мс
+    error_summary = models.TextField(blank=True)
+    response_time_ms = models.FloatField(null=True)  # Время ответа в мс
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
