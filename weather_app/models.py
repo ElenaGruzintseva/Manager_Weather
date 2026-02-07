@@ -8,6 +8,8 @@ class WeatherData(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, db_index=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, db_index=True)
 
+    timezone_name = models.CharField(max_length=50, null=True, blank=True, db_index=True)
+
     # Основные параметры
     temperature = models.FloatField(null=True, blank=True)
     pressure = models.IntegerField(null=True, blank=True)

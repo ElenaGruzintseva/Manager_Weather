@@ -12,10 +12,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class WeatherDataViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = WeatherData.objects.all()
+class WeatherDataViewSet(viewsets.ModelViewSet):
+    queryset = WeatherData.objects.select_related().only(
+        'id', 'latitude', 'longitude', 'temperature', 'pressure', 'humidity',
+        'prec_type', 'prec_strength', 'wind_speed', 'wind_direction',
+        'fetched_at', 'created_at', 'updated_at'
+    ).order_by('-fetched_at')
     serializer_class = WeatherDataSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         # Опционально: фильтрация по координатам через query params
@@ -28,7 +33,7 @@ class WeatherDataViewSet(viewsets.ReadOnlyModelViewSet):
                 lon_f = float(lon)
                 queryset = queryset.filter(latitude=lat_f, longitude=lon_f)
             except ValueError:
-                pass  # Игнорируем невалидные параметры
+                pass
         return queryset
 
     @swagger_auto_schema(

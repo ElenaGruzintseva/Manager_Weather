@@ -145,6 +145,11 @@ PIPELINE_CONFIG = {
     },
     'log_to_db': {
         'enabled': True,
+    },
+    'notify_telegram': {
+        'enabled': True,
+        'bot_token': os.getenv('TELEGRAM_BOT_TOKEN', ''),
+        'chat_ids': os.getenv('TELEGRAM_CHAT_IDS', '').split(',')
     }
 }
 
