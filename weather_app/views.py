@@ -75,9 +75,11 @@ class WeatherFetchLogViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet для просмотра логов запросов к внешнему API
     """
-    queryset = WeatherFetchLog.objects.all()
+    queryset = WeatherFetchLog.objects.only(
+        'id', 'location', 'status', 'error_summary', 'response_time_ms', 'created_at'
+    ).order_by('-created_at')
     serializer_class = WeatherFetchLogSerializer
     permission_classes = [IsAuthenticated]
-    filterset_fields = ['location', 'status']
+    filterset_fields = ['location', 'status', 'created_at']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
