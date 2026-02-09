@@ -53,3 +53,22 @@ WeatherAPIAdapter использует WeatherAPIClient для выполнен�
  - Основной пайплайн работает с стандартизированными данными, не завися от деталей внешнего API. При изменении API (например, переименование полей) достаточно обновить логику только внутри WeatherAPIAdapter, чтобы пайплайн продолжал работать.
 
  - Команда разработки может быстро получить уведомление об ошибке и обновить адаптер, не останавливая работу всей системы. Меньше бегать к серваку :-)
+
+#### Локальный запуск:
+
+Создайте и активируйте виртуальное окружение, установите зависимости, создайте файл .env с переменными окружения, выполните миграции.
+
+Запустите Redis, запустите Django Server, Celery Worker и Celery Beat (если нужен периодический запуск задач) в отдельных терминалах.
+
+API будет доступен по адресу http://127.0.0.1:8000/api/
+
+Документация будет доступна по адресу http://127.0.0.1:8000/swagger/
+```
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+celery -A weather_api_project worker --loglevel=info
+celery -A weather_api_project beat --loglevel=info
+python manage.py runserver
+```
