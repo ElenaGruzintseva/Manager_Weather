@@ -72,9 +72,7 @@ class WeatherDataViewSet(viewsets.ModelViewSet):
 
 
 class WeatherFetchLogViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    ViewSet для просмотра логов запросов к внешнему API
-    """
+    """ViewSet для просмотра логов запросов к внешнему API"""
     queryset = WeatherFetchLog.objects.only(
         'id', 'location', 'status', 'error_summary', 'response_time_ms', 'created_at'
     ).order_by('-created_at')
